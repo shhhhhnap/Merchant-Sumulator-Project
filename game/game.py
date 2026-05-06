@@ -160,10 +160,10 @@ REGIONS = {
 }
 
 # Позиции карт
-CARD_POSITIONS = [(15, 177), (322, 118), (633, 169), (936, 177)]
-CARD_POSITIONS_OFFSCREEN_LEFT = [(-245, 177), (-245, 118), (-245, 169), (-245, 177)]
-CARD_POSITIONS_OFFSCREEN_RIGHT = [(SCREEN_WIDTH + 245, 177), (SCREEN_WIDTH + 245, 118), 
-                                   (SCREEN_WIDTH + 245, 169), (SCREEN_WIDTH + 245, 177)]
+CARD_POSITIONS = [(15, 177), (322, 177), (633, 177), (936, 177)]
+CARD_POSITIONS_OFFSCREEN_LEFT = [(-245, 177), (-245, 177), (-245, 177), (-245, 177)]
+CARD_POSITIONS_OFFSCREEN_RIGHT = [(SCREEN_WIDTH + 245, 177), (SCREEN_WIDTH + 245, 177), 
+                                   (SCREEN_WIDTH + 245, 177), (SCREEN_WIDTH + 245, 177)]
 
 # Глобальные переменные
 screen = None
