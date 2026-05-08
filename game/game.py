@@ -6,6 +6,8 @@ from enum import Enum
 pygame.init()
 pygame.font.init()
 
+# Proverka
+
 # Константы
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
