@@ -104,23 +104,23 @@ class RecipientData:
 
 # Товары
 PRODUCTS = {
-    "Пшеница": {"buy": 8, "sell": 5, "season_effects": {"Лето": 30, "Зима": -20}, 
+    "Пшеница": {"buy": 8, "sell": 5, "season_effects": {"Лето": 90, "Зима": 80}, 
                 "desc": "Самая распространенная культура в королевстве!"},
-    "Рыба": {"buy": 12, "sell": 8, "season_effects": {"Осень": 20, "Весна": -10},
+    "Рыба": {"buy": 12, "sell": 8, "season_effects": {"Осень": 40, "Весна": 70},
              "desc": "Рыболовный промысел во все времена кормил жителей юга!"},
-    "Уголь": {"buy": 10, "sell": 6, "season_effects": {"Зима": 50, "Лето": -30},
+    "Уголь": {"buy": 10, "sell": 6, "season_effects": {"Зима": 150, "Лето": -30},
               "desc": "Лучший источник тепла и энергии!"},
-    "Шерсть": {"buy": 15, "sell": 10, "season_effects": {"Зима": 40, "Весна": -20},
+    "Шерсть": {"buy": 15, "sell": 10, "season_effects": {"Зима": 140, "Весна": -10},
                "desc": "Теплое шерстяное одеяло сможет согреть даже самой суровой зимой!"},
-    "Железо": {"buy": 20, "sell": 14, "season_effects": {"Осень": 10, "Лето": -10},
+    "Железо": {"buy": 20, "sell": 14, "season_effects": {"Осень": 50, "Лето": -10},
                "desc": "Основа прогресса, найдет свое место во всех уголках страны!"},
-    "Вино": {"buy": 25, "sell": 18, "season_effects": {"Осень": 20, "Зима": 30},
+    "Вино": {"buy": 25, "sell": 18, "season_effects": {"Осень": 50, "Зима": 70},
              "desc": "Никто не откажется от бокала вина на праздничном столе!"},
-    "Лекарства": {"buy": 30, "sell": 22, "season_effects": {"Весна": 10, "Зима": 40},
+    "Лекарства": {"buy": 30, "sell": 22, "season_effects": {"Весна": 40, "Зима": 140},
                   "desc": "Крайне редки и сложны в изготовлении!"},
-    "Меха": {"buy": 35, "sell": 25, "season_effects": {"Зима": 60, "Лето": -50},
+    "Меха": {"buy": 35, "sell": 25, "season_effects": {"Зима": 160, "Лето": -50},
              "desc": "Ни одна зима на севере не обходится без теплой меховой одежды!"},
-    "Специи": {"buy": 40, "sell": 30, "season_effects": {"Осень": 15, "Весна": 15},
+    "Специи": {"buy": 40, "sell": 30, "season_effects": {"Осень": 50, "Зима": 70},
                "desc": "Вкусная еда требует много разных специй!"},
     "Драгоценные камни": {"buy": 80, "sell": 60, "season_effects": {},
                           "desc": "Символ богатства и высокого статуса!"}
@@ -128,17 +128,17 @@ PRODUCTS = {
 
 # События
 EVENTS = {
-    "Война": {"duration": 8, "effects": {"Уголь": 80, "Железо": 100, "Шерсть": 50, 
-                                          "Вино": -40, "Лекарства": 80, "Меха": 40,
-                                          "Специи": -40, "Драгоценные камни": -60},
+    "Война": {"duration": 8, "effects": {"Уголь": 200, "Железо": 200, "Шерсть": 200, 
+                                          "Вино": -20, "Лекарства": 300, "Меха": 140,
+                                          "Специи": -20, "Драгоценные камни": -30},
               "risk_mod": 20, "desc": "На границе страны вспыхнула война!"},
-    "Эпидемия": {"duration": 10, "effects": {"Лекарства": 150, "Рыба": -30},
+    "Эпидемия": {"duration": 10, "effects": {"Лекарства": 550, "Рыба": 50},
                  "risk_mod": 30, "desc": "Чума бушует на улицах королевства, будьте осторожны!"},
-    "Сухой закон": {"duration": 7, "effects": {"Вино": -80},
+    "Сухой закон": {"duration": 7, "effects": {"Вино": -40},
                     "risk_mod": 0, "desc": "Король изъявил сегодня же запретить вино во всей стране!"},
-    "Праздник": {"duration": 4, "effects": {"Драгоценные камни": 50, "Специи": 80, "Вино": 70},
+    "Праздник": {"duration": 4, "effects": {"Драгоценные камни": 300, "Специи": 300, "Вино": 300},
                  "risk_mod": 0, "desc": "Возрадуйтесь, сегодня праздник!"},
-    "Шахтёрская забастовка": {"duration": 4, "effects": {"Уголь": 100, "Железо": 120},
+    "Шахтёрская забастовка": {"duration": 4, "effects": {"Уголь": 300, "Железо": 320},
                               "risk_mod": 0, "desc": "Низкие потолки в шахтах и плохой воздух вынудили рабочих взбунтоваться!"}
 }
 
@@ -150,20 +150,20 @@ NEGATIVE_EVENTS = {
 
 # Регионы
 REGIONS = {
-    "Горный": {"effects": {"Пшеница": 20, "Рыба": 20, "Уголь": -40, "Железо": -30,
-                           "Вино": 10, "Лекарства": 30, "Специи": 30, "Драгоценные камни": -30}},
-    "Приморье": {"effects": {"Пшеница": 10, "Рыба": -40, "Уголь": 20, "Железо": 10,
-                             "Вино": -20, "Специи": 10, "Драгоценные камни": 30}},
-    "Тайга": {"effects": {"Пшеница": 10, "Уголь": 20, "Железо": 10, "Вино": 10,
-                          "Лекарства": -20, "Специи": 10, "Драгоценные камни": -10}},
+    "Горный": {"effects": {"Пшеница": 50, "Рыба": 50, "Уголь": -20, "Железо": -10,
+                           "Вино": 50, "Лекарства": 70, "Специи": 90, "Драгоценные камни": -10}},
+    "Приморье": {"effects": {"Пшеница": 30, "Рыба": -10, "Уголь": 50, "Железо": 50,
+                             "Вино": -10, "Специи": 40, "Драгоценные камни": 60}},
+    "Тайга": {"effects": {"Пшеница": 40, "Уголь": 60, "Железо": 40, "Вино": 50,
+                          "Лекарства": -10, "Специи": 50, "Драгоценные камни": -10}},
     "Степь": {"effects": {}}
 }
 
 # Позиции карт
-CARD_POSITIONS = [(15, 177), (322, 118), (633, 169), (936, 177)]
-CARD_POSITIONS_OFFSCREEN_LEFT = [(-245, 177), (-245, 118), (-245, 169), (-245, 177)]
-CARD_POSITIONS_OFFSCREEN_RIGHT = [(SCREEN_WIDTH + 245, 177), (SCREEN_WIDTH + 245, 118), 
-                                   (SCREEN_WIDTH + 245, 169), (SCREEN_WIDTH + 245, 177)]
+CARD_POSITIONS = [(65, 177), (372, 177), (683, 177), (986, 177)]
+CARD_POSITIONS_OFFSCREEN_LEFT = [(-245, 177), (-245, 177), (-245, 177), (-245, 177)]
+CARD_POSITIONS_OFFSCREEN_RIGHT = [(SCREEN_WIDTH + 245, 177), (SCREEN_WIDTH + 245, 177), 
+                                   (SCREEN_WIDTH + 245, 177), (SCREEN_WIDTH + 245, 177)]
 
 # Глобальные переменные
 screen = None
@@ -175,8 +175,8 @@ font_small = None
 
 current_window = Window.MENU
 lvl = 1
-is_pro = False
-balance = 100
+is_pro = True
+balance = 300
 target_sum = 1000
 step = 1
 season = Season.SUMMER
@@ -248,7 +248,7 @@ def calculate_sell_price(product_name, region=None):
             modifier += region_effects[product_name] / 100
     
     price = base_price * modifier
-    return max(base_price * 0.2, min(base_price * 2.5, price))
+    return max(base_price, min(base_price * 4, price))
 
 
 def update_prices():
@@ -286,7 +286,7 @@ def generate_random_card():
             'base_sell': product['sell'],
             'desc': product['desc']
         }
-    elif rand < 0.85:
+    elif rand < 0.9:
         event_name = random.choice(list(EVENTS.keys()))
         event = EVENTS[event_name]
         return {
@@ -298,8 +298,13 @@ def generate_random_card():
             'risk_mod': event['risk_mod']
         }
     else:
-        neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))
-        neg = NEGATIVE_EVENTS[neg_name]
+        if (lvl == 1):
+            neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))
+            while (neg_name == "Разбойники"): neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))                
+            neg = NEGATIVE_EVENTS[neg_name]
+        else:
+            neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))
+            neg = NEGATIVE_EVENTS[neg_name]
         return {
             'name': neg_name,
             'type': CardType.NEGATIVE,
@@ -419,9 +424,9 @@ def init_buttons():
             ButtonData(490, 474, 300, 83, "Выйти", COLORS['brown'], COLORS['beige'], "exit")
         ],
         Window.LEVELS: [
-            ButtonData(45, 232, 295, 85, "1 уровень", COLORS['dark_brown'], COLORS['beige'], "level1"),
-            ButtonData(360, 232, 295, 85, "2 уровень", COLORS['dark_brown'], COLORS['beige'], "level2"),
-            ButtonData(200, 340, 300, 83, "Назад", COLORS['dark_brown'], COLORS['beige'], "back")
+            ButtonData(345, 232, 295, 85, "1 уровень", COLORS['dark_brown'], COLORS['beige'], "level1"),
+            ButtonData(660, 232, 295, 85, "2 уровень", COLORS['dark_brown'], COLORS['beige'], "level2"),
+            ButtonData(500, 340, 300, 83, "Назад", COLORS['dark_brown'], COLORS['beige'], "back")
         ],
         Window.PAUSE: [
             ButtonData(490, 280, 300, 85, "Продолжить", COLORS['button_brown'], COLORS['black'], "resume"),
@@ -667,14 +672,20 @@ def handle_card_click(index, pos):
             # Кнопка "Принять" находится в области x: card.x + 16, y: card.y + 307, ширина 208, высота 38
             accept_button_rect = pygame.Rect(card.x + 16, card.y + 307, 208, 38)
             
+            is_con = True
             if accept_button_rect.collidepoint(pos):
                 if card.card_type == CardType.EVENT:
-                    active_events.append({
+                    for i in active_events:
+                        if (i["name"] == card.name): 
+                            i["duration"] = card.effect_duration
+                            is_con = False
+                    if is_con:
+                        active_events.append({
                         'name': card.name,
                         'duration': card.effect_duration,
                         'effects': card.effects,
                         'risk_mod': card.risk_mod
-                    })
+                        })
                 elif card.card_type == CardType.NEGATIVE:
                     apply_negative_effect(card.name)
                 
@@ -782,7 +793,7 @@ def end_turn():
     current_open_card_index = -1
     
     # Списание налога 5%
-    balance = int(balance * 0.95)
+    balance = int(balance * 0.97)
     
     if balance <= 0:
         current_window = Window.GAME_OVER
@@ -836,7 +847,7 @@ def restart_game():
     global last_bought_card, is_animating
     global has_revealed_card_this_turn, waiting_for_action, current_open_card_index
     
-    balance = 100
+    balance = 300
     step = 1
     season = Season.SUMMER
     inventory = []
@@ -865,7 +876,7 @@ def draw_levels():
     screen.fill(COLORS['beige'])
     
     title_surface = font_big.render("Выберите уровень", True, COLORS['dark_brown'])
-    title_rect = title_surface.get_rect(center=(SCREEN_WIDTH//2, 100))
+    title_rect = title_surface.get_rect(center=(SCREEN_WIDTH//2+10, 100))
     screen.blit(title_surface, title_rect)
     
     for button in buttons[Window.LEVELS]:
@@ -885,26 +896,59 @@ def draw_rules():
     title_rect = title_surface.get_rect(center=(SCREEN_WIDTH//2, 50))
     screen.blit(title_surface, title_rect)
     
-    rules_text = [
-        "Цель игры: заработать нужную сумму, не обанкротившись.",
+    rules_text1 = [
+        "Цель: накопить нужную сумму, не обанкротившись.",
         "",
-        "За один ход можно открыть ТОЛЬКО ОДНУ карту!",
-        "После открытия карты можно купить товар, принять событие",
-        "или отказаться. После этого ход завершается.",
+        "Игровой процесс:",
+        "• Перед вами 4 скрытые карты.",
+        "• За один ход можно открыть ТОЛЬКО ОДНУ карту.",
+        "• После открытия: купить товар, принять событие или отказаться.",
+        "• Можно пропустить ход, не открывая карту.",
         "",
-        "Можно нажать кнопку 'Пропустить ход', чтобы не открывать карту.",
+        "Зависимость цен от сезонов (жизненная логика):",
+        "• Зимой дорожают: тёплые вещи (меха, шерсть), уголь, лекарства, вино",
+        "• Летом дорожают: продукты (пшеница, рыба, специи)",
+        "• Осенью дорожают: рыба, железо, вино, специи",
+        "• Весной дорожают: лекарства, специи",
         "",
-        "Цена товара зависит от сезона и активных событий.",
-        "Цены в инвентаре меняются динамически!",
+        "Зависимость цен от событий:",
+        "• Война → дорожают ресурсы (уголь, железо, лекарства),",
+        "  дешевеют предметы роскоши (вино, драгоценности, специи)",
+        "• Эпидемия → резко дорожают лекарства, дешевеют рыба и мясо",
+        "• Сухой закон → резко дешевеет вино",
+        "• Праздник → дорожают вино, специи, драгоценности",
+        "• Шахтёрская забастовка → дорожают уголь и железо",
+        ""
+    ]
+
+    rules_text2 = [
+        "Зависимость цен от региона (2 уровень):",
+        "• Горный регион → дороже пшеница, рыба, лекарства, специи;",
+        "  дешевле уголь, железо, драгоценности",
+        "• Приморье → дороже уголь, железо, драгоценности, специи;",
+        "  дешевле рыба и вино",
+        "• Тайга → дороже пшеница, уголь, железо, вино, специи;",
+        "  дешевле лекарства и драгоценности",
+        "• Степь → базовые цены (без изменений)",
         "",
-        "На 2 уровне: продажа через выбор региона с риском потери товара."
+        "2 уровень: продажа через выбор региона доставки.",
+        "Чем дальше регион, тем выше цена, но и риск потери товара.",
+        "",
+        "Поражение: баланс стал равен 0 или ниже.",
+        "Победа: достигнута целевая сумма."
     ]
     
-    y_offset = 120
-    for line in rules_text:
+    y_offset = 100
+    for line in rules_text1:
         text_surface = font_small.render(line, True, COLORS['black'])
         screen.blit(text_surface, (50, y_offset))
-        y_offset += 25
+        y_offset += 22
+
+    y_offset = 150
+    for line in rules_text2:
+        text_surface = font_small.render(line, True, COLORS['black'])
+        screen.blit(text_surface, (730, y_offset))
+        y_offset += 22
     
     draw_button(rules_back_button)
 
@@ -918,21 +962,21 @@ def draw_main():
     target_surface = font_medium.render(f"Цель: {target_sum}", True, COLORS['brown'])
     screen.blit(target_surface, (1070, 60))
     
-    pause_button = ButtonData(40, 35, 50, 50, "▷", COLORS['dark_brown'], COLORS['white'], "pause")
+    pause_button = ButtonData(40, 35, 50, 50, "-", COLORS['dark_brown'], COLORS['white'], "pause")
     draw_button(pause_button)
     
     draw_button(skip_turn_button)
     
-    calendar_rect = pygame.Rect(400, 0, 480, 200)
+    calendar_rect = pygame.Rect(400, 0, 480, 150)
     pygame.draw.rect(screen, COLORS['dark_beige'], calendar_rect)
     pygame.draw.rect(screen, COLORS['dark_brown'], calendar_rect, 2)
     
     season_surface = font_medium.render(f"Сезон: {season.value}", True, COLORS['dark_brown'])
-    season_rect = season_surface.get_rect(center=(640, 80))
+    season_rect = season_surface.get_rect(center=(640, 50))
     screen.blit(season_surface, season_rect)
     
     step_surface = font_small.render(f"Ход: {step}/32", True, COLORS['dark_brown'])
-    step_rect = step_surface.get_rect(center=(640, 120))
+    step_rect = step_surface.get_rect(center=(640, 90))
     screen.blit(step_surface, step_rect)
     
     if active_events:
