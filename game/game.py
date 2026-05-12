@@ -707,6 +707,7 @@ def handle_card_click(index, pos):
                 elif card.card_type == CardType.NEGATIVE:
                     apply_negative_effect(card.name)
                 
+                last_bought_card = None
                 waiting_for_action = False
                 has_revealed_card_this_turn = False
                 current_open_card_index = -1
