@@ -133,6 +133,10 @@ def handle_card_click(index, pos):
         card.state = CardState.REVEALED
         if card.card_type == CardType.PRODUCT:
             card.buy_price = calculate_buy_price(card.name)
+        elif card.card_type == CardType.NEGATIVE:
+            apply_negative_effect(card.name)
+        
+        last_bought_card = None
         has_revealed_card_this_turn = True
         waiting_for_action = True
         current_open_card_index = index

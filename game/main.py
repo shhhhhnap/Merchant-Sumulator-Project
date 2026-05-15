@@ -196,11 +196,21 @@ def generate_random_card():
         event = EVENTS[event_name]
         return {'name': event_name, 'type': CardType.EVENT, 'desc': event['desc'], 'duration': event['duration'], 'effects': event['effects'], 'risk_mod': event['risk_mod']}
     else:
-        neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))
         if lvl == 1:
+            if last_bought_card is None:
+                product_name = random.choice(list(PRODUCTS.keys()))
+                product = PRODUCTS[product_name]
+                return {'name': product_name, 'type': CardType.PRODUCT, 'buy': calculate_buy_price(product_name), 'sell': calculate_sell_price(product_name), 'base_buy': product['buy'], 'base_sell': product['sell'], 'desc': product['desc']}
+            neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))
             while neg_name == "Разбойники":
                 neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))
-        neg = NEGATIVE_EVENTS[neg_name]
+            neg = NEGATIVE_EVENTS[neg_name]
+        else:
+            neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))
+            if last_bought_card is None:
+                while neg_name == "Неудачное вложение":
+                    neg_name = random.choice(list(NEGATIVE_EVENTS.keys()))
+            neg = NEGATIVE_EVENTS[neg_name]
         return {'name': neg_name, 'type': CardType.NEGATIVE, 'desc': neg['desc'], 'duration': neg['duration']}
 
 def init_field_cards():
@@ -404,12 +414,15 @@ def handle_card_click(index, pos):
                     new_card = CardData(name=card.name, card_type=card.card_type, state=CardState.INVENTORY, x=0, y=0, buy_price=card.buy_price, sell_price=calculate_sell_price(card.name), base_buy=card.base_buy, base_sell=card.base_sell, description=card.description)
                     inventory.append(new_card)
                     last_bought_card = new_card
+                else:
+                    last_bought_card = None
                 waiting_for_action = False
                 has_revealed_card_this_turn = False
                 current_open_card_index = -1
                 end_turn()
                 return
             elif pygame.Rect(card.x + 129, card.y + 290, 95, 38).collidepoint(pos):
+                last_bought_card = None
                 waiting_for_action = False
                 has_revealed_card_this_turn = False
                 current_open_card_index = -1
