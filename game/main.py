@@ -20,7 +20,7 @@ font_small = pygame.font.Font(None, 24)
 
 current_window = Window.MENU
 lvl = 1
-is_pro = True
+is_pro = False
 balance = 300
 target_sum = 1000
 step = 1
