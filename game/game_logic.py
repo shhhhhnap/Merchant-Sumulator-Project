@@ -4,7 +4,7 @@ from game_structures import CardData, RecipientData
 
 # Глобальные переменные
 lvl = 1
-is_pro = True
+is_pro = False
 balance = 300
 target_sum = 1000
 step = 1
