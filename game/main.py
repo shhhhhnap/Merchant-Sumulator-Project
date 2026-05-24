@@ -70,7 +70,7 @@ def init_buttons():
             ButtonData(490, 280, 300, 85, "Продолжить", COLORS['button_brown'], COLORS['black'], "resume"),
             ButtonData(490, 377, 300, 85, "Правила", COLORS['button_brown'], COLORS['black'], "rules"),
             ButtonData(490, 474, 300, 85, "Выйти", COLORS['button_brown'], COLORS['black'], "exit")
-        ]
+        ] 
     }
     close_button = ButtonData(1200, 35, 40, 40, "X", COLORS['white'], COLORS['dark_brown'], "close")
     skip_turn_button = ButtonData(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 80, 130, 50, "Пропустить ход", COLORS['button_brown'], COLORS['black'], "skip_turn")
@@ -642,13 +642,14 @@ def draw_recipient_window():
 def draw_pause():
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     overlay.set_alpha(180)
-    overlay.fill(COLORS['black'])
-    screen.blit(overlay, (0, 0))
-    window_rect = pygame.Rect(SCREEN_WIDTH//2 - 250, SCREEN_HEIGHT//2 - 200, 500, 400)
-    pygame.draw.rect(screen, COLORS['beige'], window_rect)
-    pygame.draw.rect(screen, COLORS['dark_brown'], window_rect, 3)
-    screen.blit(font_big.render("Пауза", True, COLORS['dark_brown']), (SCREEN_WIDTH//2 - 60, SCREEN_HEIGHT//2 - 120))
-    y_offset = SCREEN_HEIGHT//2 - 50
+    # overlay.fill(COLORS['black'])
+    screen.fill(COLORS['beige'])
+    # screen.blit(overlay, (0, 0))
+    window_rect = pygame.Rect(SCREEN_WIDTH//2 - 300, SCREEN_HEIGHT//2 - 250, 600, 500)
+    # pygame.draw.rect(screen, COLORS['beige'], window_rect)
+    # pygame.draw.rect(screen, COLORS['dark_brown'], window_rect, 3)
+    screen.blit(font_big.render("Пауза", True, COLORS['dark_brown']), (SCREEN_WIDTH//2 - 60, SCREEN_HEIGHT//2 - 180))
+    y_offset = SCREEN_HEIGHT//2 - 100
     for button in buttons[Window.PAUSE]:
         button.y = y_offset
         draw_button(button)
