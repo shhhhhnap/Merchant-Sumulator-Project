@@ -1,4 +1,4 @@
-from game_config import CARD_POSITIONS, CARD_POSITIONS_OFFSCREEN_RIGHT
+from game_config import CARD_POSITIONS, CARD_POSITIONS_OFFSCREEN_RIGHT, CARD_POSITIONS_OFFSCREEN_LEFT
 from game_structures import CardData
 from game_logic import field_cards, new_field_cards, generate_random_card
 from game_logic import is_animating, animation_progress, animation_speed

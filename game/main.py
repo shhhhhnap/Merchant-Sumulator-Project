@@ -362,7 +362,7 @@ def handle_button_action(action, data=None):
         if current_window == Window.LEVELS:
             current_window = Window.MENU
         elif current_window == Window.RULES:
-            current_window = Window.MENU
+            current_window = Window.MAIN
         elif current_window == Window.PAUSE:
             current_window = Window.MAIN
         elif current_window == Window.SELL_REGIONS:

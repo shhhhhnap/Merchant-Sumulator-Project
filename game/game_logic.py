@@ -1,6 +1,7 @@
 import random
 from game_config import PRODUCTS, EVENTS, NEGATIVE_EVENTS, REGIONS, Season, CardType
 from game_structures import CardData, RecipientData
+from game_config import CardState
 
 # Глобальные переменные
 lvl = 1
