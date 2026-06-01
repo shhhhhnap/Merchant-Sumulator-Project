@@ -1,3 +1,7 @@
+"""Налоги закомментированы
+2 лвл - вкл"""
+
+from tkinter import Menu
 import pygame
 import random
 
@@ -20,7 +24,8 @@ font_small = pygame.font.Font(None, 24)
 
 current_window = Window.MENU
 lvl = 1
-is_pro = False
+is_pro = True
+is_prev_main = False
 balance = 300
 target_sum = 1000
 step = 1
@@ -270,7 +275,7 @@ def end_turn():
     waiting_for_action = False
     has_revealed_card_this_turn = False
     current_open_card_index = -1
-    balance = int(balance * 0.97)
+    #balance = int(balance * 0.97)
     if balance <= 0:
         current_window = Window.GAME_OVER
         return
@@ -305,6 +310,7 @@ def end_turn():
             global is_pro
             is_pro = True
         current_window = Window.GAME_OVER
+    show_region_selection()
 
 def apply_negative_effect(effect_name):
     global sent_products, inventory, last_bought_card
@@ -344,7 +350,7 @@ def handle_button_action(action, data=None):
     elif action == "rules":
         current_window = Window.RULES
     elif action == "exit":
-        running = False
+         current_window = Window.MENU
     elif action == "level1":
         lvl = 1
         target_sum = 1000
@@ -362,7 +368,8 @@ def handle_button_action(action, data=None):
         if current_window == Window.LEVELS:
             current_window = Window.MENU
         elif current_window == Window.RULES:
-            current_window = Window.MAIN
+            if (is_prev_main): current_window = Window.MAIN
+            else: current_window = Window.MENU
         elif current_window == Window.PAUSE:
             current_window = Window.MAIN
         elif current_window == Window.SELL_REGIONS:
@@ -457,11 +464,10 @@ def handle_inventory_click(index):
     else:
         selected_product = card
         selected_card_index = index
-        show_region_selection()
+        current_window = Window.SELL_REGIONS
 
 def show_region_selection():
     global current_window, region_buttons
-    current_window = Window.SELL_REGIONS
     region_buttons = []
     num_regions = random.randint(1, 4)
     region_names = list(REGIONS.keys())
@@ -469,7 +475,7 @@ def show_region_selection():
     for i in range(num_regions):
         region_name = region_names[i % len(region_names)]
         distance = random.randint(1, 9)
-        recipient = RecipientData(name=region_name, region=region_name, distance=distance, x=50 + i * 220, y=150)
+        recipient = RecipientData(name=region_name, region=region_name, distance=distance, x=150 + i * 250, y=250)
         button = ButtonData(recipient.x, recipient.y, recipient.width, recipient.height, region_name, COLORS['beige'], COLORS['dark_brown'], "select_region", recipient)
         region_buttons.append(button)
 
@@ -489,6 +495,7 @@ def confirm_sell():
         current_window = Window.MAIN
 
 def draw_menu():
+    is_prev_main = False
     screen.fill(COLORS['light_brown'])
     title_surface = font_big.render("Merchant Simulator", True, COLORS['beige'])
     title_rect = title_surface.get_rect(center=(SCREEN_WIDTH//2, 150))
@@ -526,6 +533,8 @@ def draw_rules():
     draw_button(rules_back_button)
 
 def draw_main():
+    global is_prev_main
+    is_prev_main = True
     screen.fill(COLORS['beige'])
     screen.blit(font_medium.render(f"Баланс: {int(balance)} золотых", True, COLORS['brown']), (1050, 21))
     screen.blit(font_medium.render(f"Цель: {target_sum}", True, COLORS['brown']), (1070, 60))
@@ -593,8 +602,8 @@ def draw_game_over():
         text, color, subtext = "ПОРАЖЕНИЕ!", COLORS['red'], "Вы обанкротились..."
     else:
         text, color, subtext = "ПОБЕДА!", COLORS['green'], f"Вы достигли цели в {target_sum} золотых!"
-    screen.blit(font_big.render(text, True, color), (SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT//2 - 100))
-    screen.blit(font_medium.render(subtext, True, COLORS['dark_brown']), (SCREEN_WIDTH//2 - 150, SCREEN_HEIGHT//2 - 40))
+    screen.blit(font_big.render(text, True, color), (SCREEN_WIDTH//2 - 70, SCREEN_HEIGHT//2 - 100))
+    screen.blit(font_medium.render(subtext, True, COLORS['dark_brown']), (SCREEN_WIDTH//2 - 185, SCREEN_HEIGHT//2 - 40))
     menu_button = ButtonData(SCREEN_WIDTH//2 - 300, SCREEN_HEIGHT//2 + 50, 250, 80, "Меню", COLORS['button_brown'], COLORS['black'], "menu")
     restart_button = ButtonData(SCREEN_WIDTH//2 + 50, SCREEN_HEIGHT//2 + 50, 250, 80, "Начать заново", COLORS['button_brown'], COLORS['black'], "restart")
     draw_button(menu_button)
@@ -648,7 +657,7 @@ def draw_pause():
     window_rect = pygame.Rect(SCREEN_WIDTH//2 - 300, SCREEN_HEIGHT//2 - 250, 600, 500)
     # pygame.draw.rect(screen, COLORS['beige'], window_rect)
     # pygame.draw.rect(screen, COLORS['dark_brown'], window_rect, 3)
-    screen.blit(font_big.render("Пауза", True, COLORS['dark_brown']), (SCREEN_WIDTH//2 - 60, SCREEN_HEIGHT//2 - 180))
+    screen.blit(font_big.render("Пауза", True, COLORS['dark_brown']), (SCREEN_WIDTH//2 - 50, SCREEN_HEIGHT//2 - 180))
     y_offset = SCREEN_HEIGHT//2 - 100
     for button in buttons[Window.PAUSE]:
         button.y = y_offset
