@@ -8,12 +8,11 @@ def generate_random_card():
     negatives = ["Разбойники", "Неудачное вложение"]
     
     rand = random.random()
-    print(f"[DEBUG] generate_random_card: rand={rand}")
 
     if rand < 0.7:
         name = random.choice(products)
         base_buy = random.randint(8, 80)
-        result = {
+        return {
             'name': name,
             'type': CardType.PRODUCT,
             'buy_price': base_buy,
@@ -22,12 +21,8 @@ def generate_random_card():
             'base_sell': int(base_buy * 0.7),
             'desc': f"Купить за {base_buy}, продать за {int(base_buy * 0.7)}"
         }
-        print(f"[DEBUG] Created PRODUCT: {name}")
-        return result
     elif rand < 0.9:
         name = random.choice(events)
-        print(f"[DEBUG] Creating EVENT: {name}")
-        
         durations = {
             "Война": 8, 
             "Эпидемия": 10, 
@@ -46,7 +41,7 @@ def generate_random_card():
         if name == "Война": risk_mod = 20
         if name == "Эпидемия": risk_mod = 30
         
-        result = {
+        return {
             'name': name,
             'type': CardType.EVENT,
             'duration': durations.get(name, 4),
@@ -54,17 +49,13 @@ def generate_random_card():
             'risk_mod': risk_mod,
             'desc': f"Событие: {name} на {durations.get(name, 4)} ходов"
         }
-        print(f"[DEBUG] EVENT result: {result}")
-        return result
     else:
         name = random.choice(negatives)
-        result = {
+        return {
             'name': name,
             'type': CardType.NEGATIVE,
             'desc': f"Негативное событие: {name}"
         }
-        print(f"[DEBUG] Created NEGATIVE: {name}")
-        return result
 
 def calculate_buy_price(product_name):
     base_prices = {"Пшеница": 8, "Рыба": 12, "Уголь": 10, "Шерсть": 15, "Железо": 20, 
@@ -129,6 +120,14 @@ def restart_game():
     game_state.has_revealed_card_this_turn = False
     game_state.current_open_card_index = -1
     game_state.last_bought_card = None
+    
+    # Сбрасываем регионы
+    game_state.regions_generated = False
+    game_state.saved_region_buttons = []
+    game_state.region_buttons = []
+    game_state.selected_product = None
+    game_state.selected_recipient = None
+    game_state.selected_card_index = None
 
 def end_turn():
     game_state.waiting_for_action = False
@@ -157,8 +156,6 @@ def end_turn():
         if event.get('duration', 0) > 1:
             event['duration'] -= 1
             new_events.append(event)
-        else:
-            print(f"[DEBUG] Event ended: {event.get('name')}")
     game_state.active_events = new_events
 
     game_state.step += 1
@@ -175,6 +172,14 @@ def end_turn():
         game_state.season = Season.SPRING
 
     update_prices()
+    
+    # Сбрасываем регионы для следующего хода
+    game_state.regions_generated = False
+    game_state.saved_region_buttons = []
+    game_state.region_buttons = []
+    game_state.selected_product = None
+    game_state.selected_recipient = None
+    game_state.selected_card_index = None
     
     from game_animation import start_animation
     start_animation()

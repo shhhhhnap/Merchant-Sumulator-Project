@@ -52,38 +52,96 @@ def draw_recipient(recip):
     pygame.draw.rect(screen, COLORS['white'], (recip.x, recip.y, recip.width, recip.height))
     pygame.draw.rect(screen, COLORS['dark_brown'], (recip.x, recip.y, recip.width, recip.height), 2)
     
-    # Внутренняя рамка (меньше)
-    pygame.draw.rect(screen, COLORS['dark_brown'], (recip.x + 10, recip.y + 10, recip.width - 20, 70), 1)
+    # Определяем количество регионов
+    num_regions = len(game_state.region_buttons)
     
-    # Иконка региона (меньше)
-    font_icon = pygame.font.Font(None, 48)  # Уменьшил с 72 до 48
+    # Адаптивные размеры в зависимости от количества регионов
+    if num_regions == 4:
+        # Для 4 регионов - всё меньше
+        icon_size = 36
+        inner_rect_height = 55
+        icon_y = 40
+        name_y = 95
+        info_y = 135
+        risk_y = 160
+        button_y = 185
+        button_height = 24
+        font_size = 16
+    elif num_regions == 3:
+        icon_size = 42
+        inner_rect_height = 60
+        icon_y = 45
+        name_y = 105
+        info_y = 150
+        risk_y = 178
+        button_y = 205
+        button_height = 26
+        font_size = 18
+    else:
+        # Для 1-2 регионов - стандартные размеры
+        icon_size = 48
+        inner_rect_height = 70
+        icon_y = 50
+        name_y = 110
+        info_y = 155
+        risk_y = 185
+        button_y = 215
+        button_height = 28
+        font_size = 20
+    
+    # Внутренняя рамка (адаптивная)
+    pygame.draw.rect(screen, COLORS['dark_brown'], (recip.x + 10, recip.y + 10, recip.width - 20, inner_rect_height), 1)
+    
+    # Иконка региона (адаптивная)
+    font_icon = pygame.font.Font(None, icon_size)
     icon = recip.name[0] if recip.name else "?"
     icon_surf = font_icon.render(icon, True, COLORS['dark_brown'])
-    icon_rect = icon_surf.get_rect(center=(recip.x + recip.width//2, recip.y + 50))
+    icon_rect = icon_surf.get_rect(center=(recip.x + recip.width//2, recip.y + icon_y))
     screen.blit(icon_surf, icon_rect)
     
-    # Название региона (меньше)
-    name_surface = font_small.render(recip.name, True, COLORS['dark_brown'])  # Используем small вместо medium
-    name_rect = name_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 110))
+    # Название региона (адаптивный шрифт)
+    try:
+        name_font = pygame.font.Font('game/assets/fonts/diarysecrets.ttf', font_size)
+    except:
+        name_font = pygame.font.Font(None, font_size)
+    
+    # Обрезаем длинные названия для 4 регионов
+    display_name = recip.name
+    if num_regions == 4 and len(display_name) > 10:
+        display_name = display_name[:8] + ".."
+    
+    name_surface = name_font.render(display_name, True, COLORS['dark_brown'])
+    name_rect = name_surface.get_rect(center=(recip.x + recip.width//2, recip.y + name_y))
     screen.blit(name_surface, name_rect)
 
-    # Информация о доставке
-    info_surface = font_small.render(f"Доставка: {recip.distance} ходов", True, COLORS['black'])
-    info_rect = info_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 155))
+    # Информация о доставке (адаптивный шрифт)
+    try:
+        info_font = pygame.font.Font('game/assets/fonts/diarysecrets.ttf', max(14, font_size - 2))
+    except:
+        info_font = pygame.font.Font(None, max(14, font_size - 2))
+    
+    info_surface = info_font.render(f"Доставка: {recip.distance} ходов", True, COLORS['black'])
+    info_rect = info_surface.get_rect(center=(recip.x + recip.width//2, recip.y + info_y))
     screen.blit(info_surface, info_rect)
 
-    # Риск
+    # Риск (адаптивный шрифт)
     risk = min(0.95, 0.05 + recip.distance * 0.03)
     risk_color = COLORS['red'] if risk > 0.5 else COLORS['green']
-    risk_surface = font_small.render(f"Риск: {int(risk * 100)}%", True, risk_color)
-    risk_rect = risk_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 185))
+    risk_surface = info_font.render(f"Риск: {int(risk * 100)}%", True, risk_color)
+    risk_rect = risk_surface.get_rect(center=(recip.x + recip.width//2, recip.y + risk_y))
     screen.blit(risk_surface, risk_rect)
     
-    # Кнопка выбора (меньше)
-    select_rect = pygame.Rect(recip.x + 20, recip.y + 215, recip.width - 40, 28)
+    # Кнопка выбора (адаптивная)
+    select_rect = pygame.Rect(recip.x + 20, recip.y + button_y, recip.width - 40, button_height)
     pygame.draw.rect(screen, COLORS['button_brown'], select_rect)
     pygame.draw.rect(screen, COLORS['dark_brown'], select_rect, 2)
-    select_text = font_small.render("Выбрать", True, COLORS['white'])
+    
+    try:
+        button_font = pygame.font.Font('game/assets/fonts/diarysecrets.ttf', max(12, font_size - 4))
+    except:
+        button_font = pygame.font.Font(None, max(12, font_size - 4))
+    
+    select_text = button_font.render("Выбрать", True, COLORS['white'])
     select_text_rect = select_text.get_rect(center=(select_rect.centerx, select_rect.centery))
     screen.blit(select_text, select_text_rect)
     
@@ -272,7 +330,7 @@ def draw_recipient_window():
     if game_state.selected_product and game_state.selected_recipient:
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         overlay.set_alpha(200)
-        overlay.fill(COLORS['dark_brown'])
+        overlay.fill(COLORS['beige'])
         screen.blit(overlay, (0, 0))
         
         window_rect = pygame.Rect(SCREEN_WIDTH//2 - 250, SCREEN_HEIGHT//2 - 200, 500, 400)

@@ -7,8 +7,8 @@ class GameState:
     def __init__(self):
         # Окна и UI
         self.current_window = Window.MENU
-        self.running = True
         self.previous_window = Window.MENU
+        self.running = True
         
         # Игровые параметры
         self.lvl = 1
@@ -40,6 +40,10 @@ class GameState:
         self.selected_recipient = None
         self.selected_card_index = None
         self.region_buttons = []
+        
+        # Регионы для текущего хода (НОВЫЕ ПОЛЯ)
+        self.regions_generated = False
+        self.saved_region_buttons = []
 
 # Создаем единственный экземпляр состояния
 game_state = GameState()

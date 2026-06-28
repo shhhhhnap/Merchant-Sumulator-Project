@@ -12,25 +12,33 @@ def skip_turn():
 
 def show_region_selection():
     game_state.current_window = Window.SELL_REGIONS
+    
+    # Если регионы уже сгенерированы в этом ходу - используем сохраненные
+    if game_state.regions_generated and game_state.saved_region_buttons:
+        game_state.region_buttons = game_state.saved_region_buttons.copy()
+        return
+    
+    # Если регионы не сгенерированы - генерируем новые
     game_state.region_buttons = []
+    game_state.regions_generated = True
 
     num_regions = random.randint(1, 4)
     region_names = ["Горный", "Приморье", "Тайга", "Степь"]
     random.shuffle(region_names)
 
-    # Уменьшенные карточки, чтобы помещались все 4
-    if num_regions <= 2:
+    # Адаптивный размер
+    if num_regions == 4:
+        CARD_WIDTH = 170
+        CARD_HEIGHT = 260
+        CARD_SPACING = 15
+    elif num_regions == 3:
+        CARD_WIDTH = 200
+        CARD_HEIGHT = 290
+        CARD_SPACING = 25
+    else:
         CARD_WIDTH = 250
         CARD_HEIGHT = 320
         CARD_SPACING = 40
-    elif num_regions == 3:
-        CARD_WIDTH = 220
-        CARD_HEIGHT = 300
-        CARD_SPACING = 30
-    else:  # 4 региона
-        CARD_WIDTH = 190
-        CARD_HEIGHT = 280
-        CARD_SPACING = 20
     
     spacing = CARD_WIDTH + CARD_SPACING
     
@@ -48,7 +56,7 @@ def show_region_selection():
             region=region_name,
             distance=distance,
             x=x,
-            y=160,  # Немного ниже, чтобы поместился заголовок
+            y=160,
             width=CARD_WIDTH,
             height=CARD_HEIGHT
         )
@@ -58,6 +66,9 @@ def show_region_selection():
             "select_region", recipient
         )
         game_state.region_buttons.append(button)
+    
+    # Сохраняем регионы для текущего хода
+    game_state.saved_region_buttons = game_state.region_buttons.copy()
 
 def confirm_sell():
     if game_state.selected_product and game_state.selected_recipient:
@@ -77,6 +88,8 @@ def confirm_sell():
         game_state.selected_recipient = None
         game_state.selected_card_index = None
         game_state.current_window = Window.MAIN
+        
+        # НЕ сбрасываем регионы - они нужны для этого хода
         end_turn()
 
 def handle_card_click(index, pos):
@@ -84,7 +97,6 @@ def handle_card_click(index, pos):
         return
 
     card = game_state.field_cards[index]
-    print(f"[DEBUG] handle_card_click: card={card.name}, type={card.card_type}, state={card.state}")
 
     if card.state == CardState.BACK:
         if not game_state.waiting_for_action and not game_state.has_revealed_card_this_turn:
@@ -103,18 +115,12 @@ def handle_card_click(index, pos):
             return
 
     if card.state == CardState.REVEALED and game_state.waiting_for_action and index == game_state.current_open_card_index:
-        print(f"[DEBUG] Card is REVEALED, waiting for action")
         
         buy_rect = pygame.Rect(card.x + 16, card.y + 190, 95, 38)
         skip_rect = pygame.Rect(card.x + 129, card.y + 190, 95, 38)
         accept_rect = pygame.Rect(card.x + 60, card.y + 190, 120, 38)
 
-        print(f"[DEBUG] Click pos: {pos}")
-        print(f"[DEBUG] accept_rect: {accept_rect}")
-        print(f"[DEBUG] accept_rect.collidepoint(pos): {accept_rect.collidepoint(pos)}")
-
         if card.card_type == CardType.PRODUCT:
-            print(f"[DEBUG] Processing PRODUCT card")
             if buy_rect.collidepoint(pos):
                 if len(game_state.inventory) < 8 and game_state.balance >= card.buy_price:
                     game_state.balance -= card.buy_price
@@ -148,23 +154,14 @@ def handle_card_click(index, pos):
                 return
         
         else:
-            print(f"[DEBUG] Processing NON-PRODUCT card (EVENT or NEGATIVE)")
             if accept_rect.collidepoint(pos):
-                print(f"[DEBUG] Accept button clicked!")
-                
                 if card.card_type == CardType.EVENT:
-                    print(f"[DEBUG] ===== ADDING EVENT: {card.name} =====")
-                    print(f"[DEBUG] Card data: name={card.name}, duration={card.effect_duration}, effects={card.effects}")
-                    print(f"[DEBUG] Current active_events: {game_state.active_events}")
-                    
                     event_exists = False
                     for event in game_state.active_events:
                         if event.get("name") == card.name:
                             event["duration"] = card.effect_duration
                             event_exists = True
-                            print(f"[DEBUG] Updated existing event: {card.name}")
                             break
-                    
                     if not event_exists:
                         new_event = {
                             'name': card.name,
@@ -173,22 +170,17 @@ def handle_card_click(index, pos):
                             'risk_mod': card.risk_mod
                         }
                         game_state.active_events.append(new_event)
-                        print(f"[DEBUG] ADDED NEW EVENT: {new_event}")
-                        print(f"[DEBUG] active_events now: {game_state.active_events}")
-                    else:
-                        print(f"[DEBUG] Event already exists, updated duration")
+                    print(f"[DEBUG] Event accepted: {card.name}")
                     
                 elif card.card_type == CardType.NEGATIVE:
-                    print(f"[DEBUG] Applying NEGATIVE: {card.name}")
                     apply_negative_effect(card.name)
+                    print(f"[DEBUG] Negative effect applied: {card.name}")
                 
                 game_state.waiting_for_action = False
                 game_state.has_revealed_card_this_turn = False
                 game_state.current_open_card_index = -1
                 end_turn()
                 return
-            else:
-                print(f"[DEBUG] Accept button NOT clicked")
 
 def handle_inventory_click(index):
     if game_state.waiting_for_action or game_state.is_animating or game_state.has_revealed_card_this_turn:
@@ -213,7 +205,6 @@ def handle_click(pos):
             game_state.current_window = Window.LEVELS
             return
         if 508 <= pos[0] <= 760 and 420 <= pos[1] <= 485:
-            game_state.previous_window = Window.MENU
             game_state.current_window = Window.RULES
             return
         if 508 <= pos[0] <= 760 and 505 <= pos[1] <= 570:
@@ -249,21 +240,21 @@ def handle_click(pos):
             return
         return
 
-    # ===== ПАУЗА =====
+ # ===== ПАУЗА =====
     if game_state.current_window == Window.PAUSE:
         if 511 <= pos[0] <= 770 and 266 <= pos[1] <= 337:
             game_state.current_window = Window.MAIN
             return
         if 511 <= pos[0] <= 770 and 357 <= pos[1] <= 428:
-            game_state.previous_window = Window.PAUSE  # <-- Запоминаем, что были в PAUSE
+            game_state.previous_window = Window.PAUSE
             game_state.current_window = Window.RULES
             return
         if 511 <= pos[0] <= 770 and 448 <= pos[1] <= 518:
-            game_state.running = False
+            game_state.current_window = Window.MENU  # <-- Меняем на MENU
+            game_state.running = True  # <-- Оставляем игру запущенной
             return
         return
 
-  
     # ===== ОСНОВНОЙ ЭКРАН =====
     if game_state.current_window == Window.MAIN:
         # Пауза
@@ -285,10 +276,9 @@ def handle_click(pos):
                 return
         
         # События/Календарь
-        if pygame.Rect(515, 0, 250, 60).collidepoint(pos):
+        if pygame.Rect(400, 0, 480, 200).collidepoint(pos):
             game_state.current_window = Window.EVENTS
             return
-        
         
         # Пропуск хода
         skip_rect = pygame.Rect(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 80, 130, 50)
@@ -312,8 +302,13 @@ def handle_click(pos):
 
     # ===== ВЫБОР РЕГИОНА =====
     if game_state.current_window == Window.SELL_REGIONS:
-        # Кнопка-стрелочка назад (60, 70)
-        if 60 <= pos[0] <= 110 and 70 <= pos[1] <= 120:  # 50x50 область для стрелки
+        # Стрелочка назад (60, 70) - проверка клика по кругу
+        arrow_x = 60
+        arrow_y = 70
+        
+        dx = pos[0] - arrow_x
+        dy = pos[1] - arrow_y
+        if dx * dx + dy * dy <= 30 * 30:
             game_state.current_window = Window.MAIN
             game_state.selected_product = None
             game_state.selected_card_index = None
