@@ -18,17 +18,39 @@ def show_region_selection():
     region_names = ["Горный", "Приморье", "Тайга", "Степь"]
     random.shuffle(region_names)
 
+    # Уменьшенные карточки, чтобы помещались все 4
+    if num_regions <= 2:
+        CARD_WIDTH = 250
+        CARD_HEIGHT = 320
+        CARD_SPACING = 40
+    elif num_regions == 3:
+        CARD_WIDTH = 220
+        CARD_HEIGHT = 300
+        CARD_SPACING = 30
+    else:  # 4 региона
+        CARD_WIDTH = 190
+        CARD_HEIGHT = 280
+        CARD_SPACING = 20
+    
+    spacing = CARD_WIDTH + CARD_SPACING
+    
+    total_width = num_regions * CARD_WIDTH + (num_regions - 1) * CARD_SPACING
+    start_x = (SCREEN_WIDTH - total_width) // 2
+
     for i in range(num_regions):
         region_name = region_names[i % len(region_names)]
         distance = random.randint(1, 9)
+        
+        x = start_x + i * spacing
+        
         recipient = RecipientData(
             name=region_name,
             region=region_name,
             distance=distance,
-            x=50 + i * 220,
-            y=150,
-            width=200,
-            height=300
+            x=x,
+            y=160,  # Немного ниже, чтобы поместился заголовок
+            width=CARD_WIDTH,
+            height=CARD_HEIGHT
         )
         button = ButtonData(
             recipient.x, recipient.y, recipient.width, recipient.height,
@@ -263,16 +285,10 @@ def handle_click(pos):
                 return
         
         # События/Календарь
-        if pygame.Rect(400, 0, 480, 200).collidepoint(pos):
+        if pygame.Rect(515, 0, 250, 60).collidepoint(pos):
             game_state.current_window = Window.EVENTS
             return
         
-        # Кнопка ПРАВИЛ (добавьте нужные координаты для вашей кнопки)
-        # Например, если кнопка правил находится где-то на экране:
-        if pygame.Rect(SCREEN_WIDTH - 200, 10, 180, 40).collidepoint(pos):
-            game_state.previous_window = Window.MAIN  # <-- Запоминаем, что были в MAIN
-            game_state.current_window = Window.RULES
-            return
         
         # Пропуск хода
         skip_rect = pygame.Rect(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 80, 130, 50)
@@ -296,6 +312,13 @@ def handle_click(pos):
 
     # ===== ВЫБОР РЕГИОНА =====
     if game_state.current_window == Window.SELL_REGIONS:
+        # Кнопка-стрелочка назад (60, 70)
+        if 60 <= pos[0] <= 110 and 70 <= pos[1] <= 120:  # 50x50 область для стрелки
+            game_state.current_window = Window.MAIN
+            game_state.selected_product = None
+            game_state.selected_card_index = None
+            return
+        
         if 1200 <= pos[0] <= 1240 and 35 <= pos[1] <= 75:
             game_state.current_window = Window.MAIN
             game_state.selected_product = None

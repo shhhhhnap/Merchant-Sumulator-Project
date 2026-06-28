@@ -48,24 +48,45 @@ def draw_card(card):
             screen.blit(price_txt, (card.x + 15, card.y + 10))
 
 def draw_recipient(recip):
-    pygame.draw.rect(screen, COLORS['beige'], (recip.x, recip.y, recip.width, recip.height))
+    # Рисуем фон карточки
+    pygame.draw.rect(screen, COLORS['white'], (recip.x, recip.y, recip.width, recip.height))
     pygame.draw.rect(screen, COLORS['dark_brown'], (recip.x, recip.y, recip.width, recip.height), 2)
-    pygame.draw.rect(screen, COLORS['white'], (recip.x + 25, recip.y + 20, recip.width - 50, 100))
-    pygame.draw.rect(screen, COLORS['dark_brown'], (recip.x + 25, recip.y + 20, recip.width - 50, 100), 1)
     
-    name_surface = font_medium.render(recip.name, True, COLORS['dark_brown'])
-    name_rect = name_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 150))
+    # Внутренняя рамка (меньше)
+    pygame.draw.rect(screen, COLORS['dark_brown'], (recip.x + 10, recip.y + 10, recip.width - 20, 70), 1)
+    
+    # Иконка региона (меньше)
+    font_icon = pygame.font.Font(None, 48)  # Уменьшил с 72 до 48
+    icon = recip.name[0] if recip.name else "?"
+    icon_surf = font_icon.render(icon, True, COLORS['dark_brown'])
+    icon_rect = icon_surf.get_rect(center=(recip.x + recip.width//2, recip.y + 50))
+    screen.blit(icon_surf, icon_rect)
+    
+    # Название региона (меньше)
+    name_surface = font_small.render(recip.name, True, COLORS['dark_brown'])  # Используем small вместо medium
+    name_rect = name_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 110))
     screen.blit(name_surface, name_rect)
 
+    # Информация о доставке
     info_surface = font_small.render(f"Доставка: {recip.distance} ходов", True, COLORS['black'])
-    info_rect = info_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 200))
+    info_rect = info_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 155))
     screen.blit(info_surface, info_rect)
 
+    # Риск
     risk = min(0.95, 0.05 + recip.distance * 0.03)
-    risk_surface = font_small.render(f"Риск: {int(risk * 100)}%", True, COLORS['red'])
-    risk_rect = risk_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 230))
+    risk_color = COLORS['red'] if risk > 0.5 else COLORS['green']
+    risk_surface = font_small.render(f"Риск: {int(risk * 100)}%", True, risk_color)
+    risk_rect = risk_surface.get_rect(center=(recip.x + recip.width//2, recip.y + 185))
     screen.blit(risk_surface, risk_rect)
-
+    
+    # Кнопка выбора (меньше)
+    select_rect = pygame.Rect(recip.x + 20, recip.y + 215, recip.width - 40, 28)
+    pygame.draw.rect(screen, COLORS['button_brown'], select_rect)
+    pygame.draw.rect(screen, COLORS['dark_brown'], select_rect, 2)
+    select_text = font_small.render("Выбрать", True, COLORS['white'])
+    select_text_rect = select_text.get_rect(center=(select_rect.centerx, select_rect.centery))
+    screen.blit(select_text, select_text_rect)
+    
 def draw_background(bg_type):
     bg = image_manager.get_background(bg_type)
     if bg:
@@ -208,15 +229,39 @@ def draw_events_window():
 def draw_sell_regions():
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     overlay.set_alpha(200)
-    overlay.fill(COLORS['dark_brown'])
+    overlay.fill(COLORS['beige'])
     screen.blit(overlay, (0, 0))
     
-    title = font_big.render("Выберите регион для продажи", True, COLORS['beige'])
+    # ===== СТРЕЛОЧКА НАЗАД (60, 70) =====
+    arrow_x = 60
+    arrow_y = 70
+    
+    # Рисуем круглую кнопку
+    pygame.draw.circle(screen, COLORS['dark_brown'], (arrow_x, arrow_y), 30)
+    pygame.draw.circle(screen, COLORS['beige'], (arrow_x, arrow_y), 27)
+    pygame.draw.circle(screen, COLORS['dark_brown'], (arrow_x, arrow_y), 27, 2)
+    
+    # Рисуем стрелку влево (отцентрирована внутри круга)
+    arrow_size = 12
+    arrow_points = [
+        (arrow_x + arrow_size - 5, arrow_y - 10),  # Верхняя точка (сдвинута влево на 5)
+        (arrow_x - arrow_size + 2 - 5, arrow_y),    # Острие стрелы (сдвинуто влево на 5)
+        (arrow_x + arrow_size - 5, arrow_y + 10),   # Нижняя точка (сдвинута влево на 5)
+    ]
+    pygame.draw.polygon(screen, COLORS['dark_brown'], arrow_points)
+    
+    # Подпись "Назад" под стрелкой
+    back_text = font_small.render("Назад", True, COLORS['dark_brown'])
+    back_rect = back_text.get_rect(center=(arrow_x, arrow_y + 50))
+    screen.blit(back_text, back_rect)
+    
+    # ===== ЗАГОЛОВОК =====
+    title = font_big.render("Выберите регион для продажи", True, COLORS['dark_brown'])
     title_rect = title.get_rect(center=(SCREEN_WIDTH//2, 50))
     screen.blit(title, title_rect)
 
     if game_state.selected_product:
-        product_text = font_medium.render(f"Товар: {game_state.selected_product.name}", True, COLORS['beige'])
+        product_text = font_medium.render(f"Товар: {game_state.selected_product.name}", True, COLORS['dark_brown'])
         product_rect = product_text.get_rect(center=(SCREEN_WIDTH//2, 110))
         screen.blit(product_text, product_rect)
 
@@ -232,7 +277,7 @@ def draw_recipient_window():
         
         window_rect = pygame.Rect(SCREEN_WIDTH//2 - 250, SCREEN_HEIGHT//2 - 200, 500, 400)
         pygame.draw.rect(screen, COLORS['beige'], window_rect)
-        pygame.draw.rect(screen, COLORS['dark_brown'], window_rect, 3)
+        pygame.draw.rect(screen, COLORS['beige'], window_rect, 3)
         
         title = font_big.render("Подтверждение продажи", True, COLORS['dark_brown'])
         title_rect = title.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 150))
