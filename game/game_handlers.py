@@ -4,7 +4,7 @@ from game_config import *
 from game_logic import *
 from game_animation import init_field_cards, start_animation
 from game_state import game_state
-from game_structures import CardData
+from game_structures import CardData, RecipientData, ButtonData
 
 def skip_turn():
     if not game_state.waiting_for_action and not game_state.has_revealed_card_this_turn and not game_state.is_animating:
@@ -62,6 +62,7 @@ def handle_card_click(index, pos):
         return
 
     card = game_state.field_cards[index]
+    print(f"[DEBUG] handle_card_click: card={card.name}, type={card.card_type}, state={card.state}")
 
     if card.state == CardState.BACK:
         if not game_state.waiting_for_action and not game_state.has_revealed_card_this_turn:
@@ -80,22 +81,28 @@ def handle_card_click(index, pos):
             return
 
     if card.state == CardState.REVEALED and game_state.waiting_for_action and index == game_state.current_open_card_index:
+        print(f"[DEBUG] Card is REVEALED, waiting for action")
         
         buy_rect = pygame.Rect(card.x + 16, card.y + 190, 95, 38)
         skip_rect = pygame.Rect(card.x + 129, card.y + 190, 95, 38)
         accept_rect = pygame.Rect(card.x + 60, card.y + 190, 120, 38)
 
+        print(f"[DEBUG] Click pos: {pos}")
+        print(f"[DEBUG] accept_rect: {accept_rect}")
+        print(f"[DEBUG] accept_rect.collidepoint(pos): {accept_rect.collidepoint(pos)}")
+
         if card.card_type == CardType.PRODUCT:
+            print(f"[DEBUG] Processing PRODUCT card")
             if buy_rect.collidepoint(pos):
                 if len(game_state.inventory) < 8 and game_state.balance >= card.buy_price:
                     game_state.balance -= card.buy_price
                     new_card = CardData(
-                        name=card.name,
+                        name=(card.name + '-инвентарь'),
                         card_type=card.card_type,
                         state=CardState.INVENTORY,
                         x=0, y=0,
                         buy_price=card.buy_price,
-                        sell_price=calculate_sell_price(card.name),
+                        sell_price=calculate_sell_price(card.name + '-инвентарь'),
                         base_buy=card.base_buy,
                         base_sell=card.base_sell,
                         description=card.description
@@ -119,32 +126,47 @@ def handle_card_click(index, pos):
                 return
         
         else:
+            print(f"[DEBUG] Processing NON-PRODUCT card (EVENT or NEGATIVE)")
             if accept_rect.collidepoint(pos):
+                print(f"[DEBUG] Accept button clicked!")
+                
                 if card.card_type == CardType.EVENT:
+                    print(f"[DEBUG] ===== ADDING EVENT: {card.name} =====")
+                    print(f"[DEBUG] Card data: name={card.name}, duration={card.effect_duration}, effects={card.effects}")
+                    print(f"[DEBUG] Current active_events: {game_state.active_events}")
+                    
                     event_exists = False
                     for event in game_state.active_events:
-                        if event["name"] == card.name:
+                        if event.get("name") == card.name:
                             event["duration"] = card.effect_duration
                             event_exists = True
+                            print(f"[DEBUG] Updated existing event: {card.name}")
                             break
+                    
                     if not event_exists:
-                        game_state.active_events.append({
+                        new_event = {
                             'name': card.name,
                             'duration': card.effect_duration,
-                            'effects': card.effects,
+                            'effects': card.effects.copy() if card.effects else {},
                             'risk_mod': card.risk_mod
-                        })
-                    print(f"[DEBUG] Event accepted: {card.name}")
+                        }
+                        game_state.active_events.append(new_event)
+                        print(f"[DEBUG] ADDED NEW EVENT: {new_event}")
+                        print(f"[DEBUG] active_events now: {game_state.active_events}")
+                    else:
+                        print(f"[DEBUG] Event already exists, updated duration")
                     
                 elif card.card_type == CardType.NEGATIVE:
+                    print(f"[DEBUG] Applying NEGATIVE: {card.name}")
                     apply_negative_effect(card.name)
-                    print(f"[DEBUG] Negative effect applied: {card.name}")
                 
                 game_state.waiting_for_action = False
                 game_state.has_revealed_card_this_turn = False
                 game_state.current_open_card_index = -1
                 end_turn()
                 return
+            else:
+                print(f"[DEBUG] Accept button NOT clicked")
 
 def handle_inventory_click(index):
     if game_state.waiting_for_action or game_state.is_animating or game_state.has_revealed_card_this_turn:
@@ -157,7 +179,6 @@ def handle_inventory_click(index):
         game_state.balance += card.sell_price
         game_state.inventory.pop(index)
         print(f"[DEBUG] Sold {card.name} for {card.sell_price}")
-        end_turn()
     else:
         game_state.selected_product = card
         game_state.selected_card_index = index
@@ -170,6 +191,7 @@ def handle_click(pos):
             game_state.current_window = Window.LEVELS
             return
         if 508 <= pos[0] <= 760 and 420 <= pos[1] <= 485:
+            game_state.previous_window = Window.MENU
             game_state.current_window = Window.RULES
             return
         if 508 <= pos[0] <= 760 and 505 <= pos[1] <= 570:
@@ -188,7 +210,7 @@ def handle_click(pos):
             update_prices()
             game_state.current_window = Window.MAIN
             return
-        if 660 <= pos[0] <= 955 and 232 <= pos[1] <= 317:
+        if 657 <= pos[0] <= 915 and 321 <= pos[1] <= 393:
             if game_state.is_pro:
                 print("[INFO] Starting Level 2...")
                 game_state.lvl = 2
@@ -200,7 +222,7 @@ def handle_click(pos):
             else:
                 print("[WARN] Level 2 locked!")
             return
-        if 500 <= pos[0] <= 800 and 340 <= pos[1] <= 423:
+        if 511 <= pos[0] <= 765 and 426 <= pos[1] <= 500:
             game_state.current_window = Window.MENU
             return
         return
@@ -211,6 +233,7 @@ def handle_click(pos):
             game_state.current_window = Window.MAIN
             return
         if 511 <= pos[0] <= 770 and 357 <= pos[1] <= 428:
+            game_state.previous_window = Window.PAUSE  # <-- Запоминаем, что были в PAUSE
             game_state.current_window = Window.RULES
             return
         if 511 <= pos[0] <= 770 and 448 <= pos[1] <= 518:
@@ -218,6 +241,7 @@ def handle_click(pos):
             return
         return
 
+  
     # ===== ОСНОВНОЙ ЭКРАН =====
     if game_state.current_window == Window.MAIN:
         # Пауза
@@ -233,7 +257,7 @@ def handle_click(pos):
         
         # Инвентарь
         for i in range(len(game_state.inventory)):
-            inv_rect = pygame.Rect(218 + i * 85, 553, 70, 100)
+            inv_rect = pygame.Rect(187 + i * 127, 673, 80, 10)
             if inv_rect.collidepoint(pos):
                 handle_inventory_click(i)
                 return
@@ -241,6 +265,13 @@ def handle_click(pos):
         # События/Календарь
         if pygame.Rect(400, 0, 480, 200).collidepoint(pos):
             game_state.current_window = Window.EVENTS
+            return
+        
+        # Кнопка ПРАВИЛ (добавьте нужные координаты для вашей кнопки)
+        # Например, если кнопка правил находится где-то на экране:
+        if pygame.Rect(SCREEN_WIDTH - 200, 10, 180, 40).collidepoint(pos):
+            game_state.previous_window = Window.MAIN  # <-- Запоминаем, что были в MAIN
+            game_state.current_window = Window.RULES
             return
         
         # Пропуск хода
@@ -253,7 +284,7 @@ def handle_click(pos):
     # ===== ПРАВИЛА =====
     if game_state.current_window == Window.RULES:
         if 30 <= pos[0] <= 70 and 30 <= pos[1] <= 70:
-            game_state.current_window = Window.MENU
+            game_state.current_window = game_state.previous_window
             return
         return
 

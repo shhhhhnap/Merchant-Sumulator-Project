@@ -40,8 +40,12 @@ def draw_card(card):
         screen.blit(img_scaled, (card.x, card.y))
         
         if card.state == CardState.REVEALED and card.card_type == CardType.PRODUCT:
-            price_txt = font_small.render(f"{card.buy_price}", True, COLORS['dark_brown'])
-            screen.blit(price_txt, (card.x + 10, card.y + 10))
+            price_txt = font_medium.render(f"{card.buy_price}", True, COLORS['dark_brown'])
+            screen.blit(price_txt, (card.x + 15, card.y + 10))
+            
+        if card.state == CardState.INVENTORY and card.card_type == CardType.PRODUCT:
+            price_txt = font_medium.render(f"{card.sell_price}", True, COLORS['dark_brown'])
+            screen.blit(price_txt, (card.x + 15, card.y + 10))
 
 def draw_recipient(recip):
     pygame.draw.rect(screen, COLORS['beige'], (recip.x, recip.y, recip.width, recip.height))
@@ -85,10 +89,6 @@ def center_text(text, font, color, rect):
 def draw_main():
     draw_background('main')
     
-    def center_text(text, font, color, rect):
-        surf = font.render(text, True, color)
-        screen.blit(surf, surf.get_rect(center=rect.center))
-    
     # Баланс и цель
     info_rect = pygame.Rect(515, 0, 250, 60)
     balance_rect = pygame.Rect(960, 0, 320, 60)
@@ -103,21 +103,19 @@ def draw_main():
     center_text(f"Ход: {game_state.step}/32", font_small, COLORS['dark_brown'], step_rect)
     
     # Активные события
-    if game_state.active_events:
-        for i, event in enumerate(game_state.active_events[:2]):
-            event_text = font_small.render(f"{event['name']}: {event['duration']} ходов", True, COLORS['red'])
-            screen.blit(event_text, (590, 160 + i * 20))
+    # if game_state.active_events:
+    #     for i, event in enumerate(game_state.active_events[:2]):
+    #         event_text = font_small.render(f"{event['name']}: {event['duration']} ходов", True, COLORS['black'])
+    #         screen.blit(event_text, (590, 160 + i * 20))
 
     # Карты на поле
     for card in game_state.field_cards:
         draw_card(card)
 
     # ===== ИНВЕНТАРЬ (РИСУЕМ КАРТЫ ПОВЕРХ ФОНА) =====
-    # Координаты для карт в инвентаре (подберите под свой фон)
-    # Если у вас 8 слотов, то позиции примерно такие:
     inventory_positions = [
-        (182, 552), (307, 553), (434, 553), (561, 553),
-        (688, 553), (815, 553), (942, 553), (1069, 553)
+        (182, 552), (309, 552), (436, 552), (563, 552),
+        (690, 552), (817, 552), (945, 552), (1072, 552)
     ]
     
     for i, card in enumerate(game_state.inventory):
@@ -130,13 +128,10 @@ def draw_main():
         img = image_manager.get_card_image(card.name, width=90, height=138)
         
         if img:
-            # Если есть изображение - рисуем его
             screen.blit(img, (x, y))
         else:
-            # Заглушка, если изображения нет
             pygame.draw.rect(screen, COLORS['white'], (x, y, 70, 100))
             pygame.draw.rect(screen, COLORS['dark_brown'], (x, y, 70, 100), 2)
-            # Первая буква
             font_icon = pygame.font.Font(None, 40)
             icon = card.name[0] if card.name else "?"
             icon_surf = font_icon.render(icon, True, COLORS['dark_brown'])
@@ -183,20 +178,27 @@ def draw_events_window():
         text_rect = surf.get_rect(center=(SCREEN_WIDTH // 2, y))
         screen.blit(surf, text_rect)
     
-    print(f"[DEBUG] Active events: {game_state.active_events}")  
-    
     if game_state.active_events:
         y = 250
         for event in game_state.active_events:
-            print(f"[DEBUG] Event: {event}")  
-            print(f"[DEBUG] Event keys: {event.keys()}")  
-            
             name = event.get('name', 'Событие')
             duration = event.get('duration', 0)
-            hod_text = decline_hod(duration)
-            full_text = f"{name} - {hod_text}"
+            effects = event.get('effects', {})
             
-            print(f"[DEBUG] Full text: {full_text}") 
+            # Формируем текст с эффектами
+            effects_text = ""
+            if effects:
+                effect_parts = []
+                for k, v in effects.items():
+                    if v > 0:
+                        effect_parts.append(f"{k}: +{v}%")
+                    else:
+                        effect_parts.append(f"{k}: {v}%")
+                if effect_parts:
+                    effects_text = f" ({', '.join(effect_parts)})"
+            
+            hod_text = decline_hod(duration)
+            full_text = f"{name} - {hod_text}{effects_text}"
             
             center_text(full_text, font_medium, COLORS['dark_brown'], y)
             y += 50
@@ -275,4 +277,3 @@ def draw_recipient_window():
         back_text = font_medium.render("Вернуться", True, COLORS['black'])
         back_text_rect = back_text.get_rect(center=(SCREEN_WIDTH//2 + 110, SCREEN_HEIGHT//2 + 175))
         screen.blit(back_text, back_text_rect)
-        

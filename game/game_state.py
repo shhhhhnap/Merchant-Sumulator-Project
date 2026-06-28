@@ -8,10 +8,11 @@ class GameState:
         # Окна и UI
         self.current_window = Window.MENU
         self.running = True
+        self.previous_window = Window.MENU
         
         # Игровые параметры
         self.lvl = 1
-        self.is_pro = False
+        self.is_pro = True
         self.balance = 300
         self.target_sum = 1000
         self.step = 1

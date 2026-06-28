@@ -8,21 +8,33 @@ def generate_random_card():
     negatives = ["Разбойники", "Неудачное вложение"]
     
     rand = random.random()
+    print(f"[DEBUG] generate_random_card: rand={rand}")
 
     if rand < 0.7:
         name = random.choice(products)
         base_buy = random.randint(8, 80)
-        return {
+        result = {
             'name': name,
             'type': CardType.PRODUCT,
             'buy_price': base_buy,
             'sell_price': int(base_buy * 0.7),
             'base_buy': base_buy,
-            'base_sell': int(base_buy * 0.7)
+            'base_sell': int(base_buy * 0.7),
+            'desc': f"Купить за {base_buy}, продать за {int(base_buy * 0.7)}"
         }
+        print(f"[DEBUG] Created PRODUCT: {name}")
+        return result
     elif rand < 0.9:
         name = random.choice(events)
-        durations = {"Война": 8, "Эпидемия": 10, "Сухой закон": 7, "Праздник": 4, "Шахтёрская забастовка": 4}
+        print(f"[DEBUG] Creating EVENT: {name}")
+        
+        durations = {
+            "Война": 8, 
+            "Эпидемия": 10, 
+            "Сухой закон": 7, 
+            "Праздник": 4, 
+            "Шахтёрская забастовка": 4
+        }
         effects = {
             "Война": {"Уголь": 80, "Железо": 100, "Меха": 40},
             "Эпидемия": {"Лекарства": 150},
@@ -34,54 +46,60 @@ def generate_random_card():
         if name == "Война": risk_mod = 20
         if name == "Эпидемия": risk_mod = 30
         
-        return {
+        result = {
             'name': name,
             'type': CardType.EVENT,
-            'duration': durations[name],
+            'duration': durations.get(name, 4),
             'effects': effects.get(name, {}),
-            'risk_mod': risk_mod
+            'risk_mod': risk_mod,
+            'desc': f"Событие: {name} на {durations.get(name, 4)} ходов"
         }
+        print(f"[DEBUG] EVENT result: {result}")
+        return result
     else:
         name = random.choice(negatives)
-        return {
+        result = {
             'name': name,
-            'type': CardType.NEGATIVE
+            'type': CardType.NEGATIVE,
+            'desc': f"Негативное событие: {name}"
         }
+        print(f"[DEBUG] Created NEGATIVE: {name}")
+        return result
 
 def calculate_buy_price(product_name):
     base_prices = {"Пшеница": 8, "Рыба": 12, "Уголь": 10, "Шерсть": 15, "Железо": 20, 
                    "Вино": 25, "Лекарства": 30, "Меха": 35, "Специи": 40, "Драгоценные камни": 80}
     base = base_prices.get(product_name, 10)
-    return int(base * random.uniform(0.9, 1.1))
+    return base
 
 def calculate_sell_price(product_name, region=None):
-    base_prices = {"Пшеница": 5, "Рыба": 8, "Уголь": 6, "Шерсть": 10, "Железо": 14, 
-                   "Вино": 18, "Лекарства": 22, "Меха": 25, "Специи": 30, "Драгоценные камни": 60}
+    base_prices = {"Пшеница-инвентарь": 5, "Рыба-инвентарь": 8, "Уголь-инвентарь": 6, "Шерсть-инвентарь": 10, "Железо-инвентарь": 14, 
+                   "Вино-инвентарь": 18, "Лекарства-инвентарь": 22, "Меха-инвентарь": 25, "Специи-инвентарь": 30, "Драгоценные камни-инвентарь": 60}
     base = base_prices.get(product_name, 5)
     
     multiplier = 1.0
     
     # Сезонность
     if game_state.season == Season.WINTER:
-        if product_name in ["Уголь", "Меха", "Лекарства"]: multiplier += 0.3
-        if product_name in ["Пшеница", "Рыба"]: multiplier -= 0.1
+        if product_name in ["Уголь-инвентарь", "Меха-инвентарь", "Лекарства-инвентарь"]: multiplier += 0.3
+        if product_name in ["Пшеница-инвентарь", "Рыба-инвентарь"]: multiplier -= 0.1
     elif game_state.season == Season.SUMMER:
-        if product_name in ["Пшеница", "Рыба"]: multiplier += 0.2
-        if product_name in ["Уголь", "Меха"]: multiplier -= 0.2
+        if product_name in ["Пшеница-инвентарь", "Рыба-инвентарь"]: multiplier += 0.2
+        if product_name in ["Уголь-инвентарь", "Меха-инвентарь"]: multiplier -= 0.2
         
     # События
     for event in game_state.active_events:
-        if product_name in event['effects']:
+        if product_name in event.get('effects', {}):
             multiplier += event['effects'][product_name] / 100.0
             
     # Регион (только для 2 уровня)
     if region and game_state.lvl == 2:
         if region == "Горный":
-            if product_name in ["Пшеница", "Рыба", "Лекарства"]: multiplier += 0.2
-            if product_name in ["Уголь", "Железо"]: multiplier -= 0.3
+            if product_name in ["Пшеница-инвентарь", "Рыба-инвентарь", "Лекарства-инвентарь"]: multiplier += 0.2
+            if product_name in ["Уголь-инвентарь", "Железо-инвентарь"]: multiplier -= 0.3
         elif region == "Приморье":
-            if product_name in ["Уголь", "Железо"]: multiplier += 0.1
-            if product_name in ["Рыба"]: multiplier -= 0.4
+            if product_name in ["Уголь-инвентарь", "Железо-инвентарь"]: multiplier += 0.1
+            if product_name in ["Рыба-инвентарь"]: multiplier -= 0.4
             
     final_price = base * multiplier
     return max(1, int(final_price))
@@ -133,11 +151,14 @@ def end_turn():
             game_state.balance += sell_price
     game_state.sent_products = new_sent_products
 
+    # Обновляем события - уменьшаем длительность
     new_events = []
     for event in game_state.active_events:
-        if event['duration'] > 1:
+        if event.get('duration', 0) > 1:
             event['duration'] -= 1
             new_events.append(event)
+        else:
+            print(f"[DEBUG] Event ended: {event.get('name')}")
     game_state.active_events = new_events
 
     game_state.step += 1
