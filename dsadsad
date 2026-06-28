@@ -1,0 +1,41 @@
+[33meab6918[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Оформление документа
+[33m946ab6f[m Code update
+[33me01aa5b[m mini update
+[33mf7239f3[m Написал тесты
+[33m0e573be[m game_logic, game_animation fix
+[33m45ef534[m Исправил Описание данных программы
+[33m8f65acb[m Поправил нумерацию в блоке "Алгоритм на естественном языке"
+[33m06f37fa[m last build
+[33mc7cf323[m 123
+[33me1fbcdc[m Merge branch 'main' of https://github.com/shhhhhnap/Merchant-Sumulator-Project так надо
+[33m6425b8f[m 123
+[33mf656ca9[m 1
+[33m4ef98c4[m Проект v2
+[33md9cbcd2[m last build
+[33m9353343[m 123
+[33mc92b3bc[m 123
+[33m0b53cb9[m qw3
+[33mb382867[m 123
+[33m09c740b[m[33m ([m[1;31morigin/feature_Makar[m[33m, [m[1;32mfeature_Makar[m[33m)[m Проект программного средства
+[33m0c6c9e1[m Merge branch 'main' into feature_Makar
+[33mfd9e4d4[m Revert "Добавил проект программного средства"
+[33m7f2b90e[m Добавил проект программного средства
+[33mbcd27dc[m Добавил проект программного средства
+[33md4ae58e[m Доработал спецификацию и оформление
+[33macb9b68[m .gitignore used from feauture_Makar
+[33m2138712[m Разбиение с поправленной логикой
+[33m5e0ae5a[m Добавил полное разбиение
+[33m4c498cb[m Переделал спецификации
+[33m9a8a5cf[m[33m ([m[1;31morigin/feature_Nikitik[m[33m)[m После взятия карты событий -> last_bought_card = None
+[33med87407[m "Неудачное вложение" больше не выпадает, если на предыдущем ходу не было куплено ни одной карты(last_bought_card = None); В функции handle_card_click при нехватке денег для покупки или отказе от покупки обновляется переменная last_bought_card
+[33m22f38ed[m Свапнул операции на математические
+[33m41eec29[m Добавил спецификацию функций и данных
+[33m46adce8[m Merge branch 'feature_Egor' into feature_Makar Copy features
+[33m6094d6e[m modified .vs/game/v17/
+[33mae05dae[m[33m ([m[1;31morigin/feature_Egor[m[33m, [m[1;32mfeature_Egor[m[33m)[m +file
+[33m3309806[m[33m ([m[1;32mfeature_Nikitik[m[33m)[m egorik xui
+[33mce2d0f6[m Fixed bags
+[33mc600bd1[m double
+[33m7372136[m Added requirements file
+[33m787b58d[m[33m ([m[1;31morigin/feature_Nikitos[m[33m, [m[1;32mfeature_Nikitos[m[33m)[m ЖУРАВЕЛЬ СУУУККАААА
+[33m276515e[m Initial commit

@@ -11,7 +11,7 @@ class ButtonData:
         self.data = data
 
 class CardData:
-    def __init__(self, name, card_type, state, x, y, width=240, height=360,
+    def __init__(self, name, card_type, state, x, y, width=180, height=240,
                  buy_price=0, sell_price=0, base_buy=0, base_sell=0,
                  description="", effect_duration=0, effects=None, risk_mod=0):
         self.name = name
@@ -29,6 +29,8 @@ class CardData:
         self.effect_duration = effect_duration
         self.effects = effects if effects is not None else {}
         self.risk_mod = risk_mod
+        
+        # Для анимации
         self.target_x = x
         self.velocity_x = 0
 
