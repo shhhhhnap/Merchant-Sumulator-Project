@@ -276,7 +276,7 @@ def handle_click(pos):
                 return
         
         # События/Календарь
-        if pygame.Rect(400, 0, 480, 200).collidepoint(pos):
+        if pygame.Rect(515, 0, 250, 60).collidepoint(pos):
             game_state.current_window = Window.EVENTS
             return
         
