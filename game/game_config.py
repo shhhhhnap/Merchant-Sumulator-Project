@@ -2,6 +2,9 @@ import pygame
 from enum import Enum
 
 pygame.init()
+pygame.mixer.init()
+pygame.mixer.music.load('game/assets/sounds/music.mp3')
+pygame.mixer.music.play(loops=-1)
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
