@@ -5,11 +5,14 @@ from game_state import game_state
 def generate_random_card():
     products = ["Пшеница", "Рыба", "Уголь", "Шерсть", "Железо", "Вино", "Лекарства", "Меха", "Специи", "Драгоценные камни"]
     events = ["Война", "Эпидемия", "Сухой закон", "Праздник", "Шахтёрская забастовка"]
-    negatives = ["Разбойники", "Неудачное вложение"]
+    if game_state.lvl == 1:
+        negatives = ["Неудачное вложение"]
+    else:
+        negatives = ["Разбойники", "Неудачное вложение"]
     
     rand = random.random()
 
-    if rand < 0.7:
+    if rand < 0.85:
         name = random.choice(products)
         base_buy = random.randint(8, 80)
         return {
@@ -21,7 +24,7 @@ def generate_random_card():
             'base_sell': int(base_buy * 0.7),
             'desc': f"Купить за {base_buy}, продать за {int(base_buy * 0.7)}"
         }
-    elif rand < 0.9:
+    elif rand < 0.95:
         name = random.choice(events)
         durations = {
             "Война": 8, 
@@ -61,36 +64,135 @@ def calculate_buy_price(product_name):
     base_prices = {"Пшеница": 8, "Рыба": 12, "Уголь": 10, "Шерсть": 15, "Железо": 20, 
                    "Вино": 25, "Лекарства": 30, "Меха": 35, "Специи": 40, "Драгоценные камни": 80}
     base = base_prices.get(product_name, 10)
-    return base
+    
+    multiplier = 1.0
+    
+    # Сезонность (как в calculate_sell_price, но для товара без суффикса)
+    if game_state.season == Season.SUMMER:
+        if product_name in ["Пшеница"]: multiplier += 0.50
+        if product_name in ["Уголь"]: multiplier -= 0.50
+        if product_name in ["Железо"]: multiplier -= 0.30
+        if product_name in ["Меха"]: multiplier -= 0.70
+        if product_name in ["Шерсть"]: multiplier -= 0.40
+        if product_name in ["Драгоценные камни"]: multiplier += 0.10
+    elif game_state.season == Season.AUTUMN:
+        if product_name in ["Пшеница"]: multiplier -= 0.30
+        if product_name in ["Рыба"]: multiplier += 0.60
+        if product_name in ["Железо"]: multiplier += 0.30
+        if product_name in ["Вино"]: multiplier += 0.40
+        if product_name in ["Специи"]: multiplier += 0.35
+    elif game_state.season == Season.WINTER:
+        if product_name in ["Железо"]: multiplier += 0.50
+        if product_name in ["Уголь"]: multiplier += 0.70
+        if product_name in ["Шерсть"]: multiplier += 0.60
+        if product_name in ["Вино"]: multiplier += 0.50
+        if product_name in ["Лекарства"]: multiplier += 0.60
+        if product_name in ["Меха"]: multiplier += 0.80
+        if product_name in ["Пшеница"]: multiplier += 0.50
+        if product_name in ["Рыба"]: multiplier += 0.70
+        if product_name in ["Специи"]: multiplier += 0.50
+    elif game_state.season == Season.SPRING:
+        if product_name in ["Рыба"]: multiplier += 0.40
+        if product_name in ["Шерсть"]: multiplier -= 0.40
+        if product_name in ["Лекарства"]: multiplier += 0.30
+        if product_name in ["Специи"]: multiplier += 0.35
+        if product_name in ["Пшеница"]: multiplier += 0.50
+        
+    # События (ищем эффекты по чистому имени и с суффиксом -инвентарь)
+    for event in game_state.active_events:
+        effects = event.get('effects', {})
+        if product_name in effects:
+            multiplier += effects[product_name] / 100.0
+        elif (product_name + "-инвентарь") in effects:
+            multiplier += effects[product_name + "-инвентарь"] / 100.0
+            
+    # Ограничения: 20%–250% от базовой цены покупки
+    multiplier = max(0.20, min(2.50, multiplier))
+    final_price = base * multiplier
+    return max(1, int(final_price))
 
-def calculate_sell_price(product_name, region=None):
-    base_prices = {"Пшеница-инвентарь": 5, "Рыба-инвентарь": 8, "Уголь-инвентарь": 6, "Шерсть-инвентарь": 10, "Железо-инвентарь": 14, 
-                   "Вино-инвентарь": 18, "Лекарства-инвентарь": 22, "Меха-инвентарь": 25, "Специи-инвентарь": 30, "Драгоценные камни-инвентарь": 60}
+def calculate_sell_price(product_name, region=None, distance=None):
+    base_prices = {"Пшеница-инвентарь": 7, "Рыба-инвентарь": 10, "Уголь-инвентарь": 8, "Шерсть-инвентарь": 13, "Железо-инвентарь": 17, 
+                   "Вино-инвентарь": 22, "Лекарства-инвентарь": 25, "Меха-инвентарь": 30, "Специи-инвентарь": 35, "Драгоценные камни-инвентарь": 70}
     base = base_prices.get(product_name, 5)
     
     multiplier = 1.0
     
-    # Сезонность
-    if game_state.season == Season.WINTER:
-        if product_name in ["Уголь-инвентарь", "Меха-инвентарь", "Лекарства-инвентарь"]: multiplier += 0.3
-        if product_name in ["Пшеница-инвентарь", "Рыба-инвентарь"]: multiplier -= 0.1
-    elif game_state.season == Season.SUMMER:
-        if product_name in ["Пшеница-инвентарь", "Рыба-инвентарь"]: multiplier += 0.2
-        if product_name in ["Уголь-инвентарь", "Меха-инвентарь"]: multiplier -= 0.2
+    # Сезонность (Таблица 3)
+    if game_state.season == Season.SUMMER:
+        if product_name in ["Пшеница-инвентарь"]: multiplier += 0.50
+        if product_name in ["Уголь-инвентарь"]: multiplier -= 0.50
+        if product_name in ["Железо-инвентарь"]: multiplier -= 0.30
+        if product_name in ["Меха-инвентарь"]: multiplier -= 0.70
+        if product_name in ["Шерсть-инвентарь"]: multiplier -= 0.40
+        if product_name in ["Драгоценные камни-инвентарь"]: multiplier += 0.10
+    elif game_state.season == Season.AUTUMN:
+        if product_name in ["Пшеница-инвентарь"]: multiplier -= 0.30
+        if product_name in ["Рыба-инвентарь"]: multiplier += 0.60
+        if product_name in ["Железо-инвентарь"]: multiplier += 0.30
+        if product_name in ["Вино-инвентарь"]: multiplier += 0.40
+        if product_name in ["Специи-инвентарь"]: multiplier += 0.35
+    elif game_state.season == Season.WINTER:
+        if product_name in ["Железо-инвентарь"]: multiplier += 0.50
+        if product_name in ["Уголь-инвентарь"]: multiplier += 0.70
+        if product_name in ["Шерсть-инвентарь"]: multiplier += 0.60
+        if product_name in ["Вино-инвентарь"]: multiplier += 0.50
+        if product_name in ["Лекарства-инвентарь"]: multiplier += 0.60
+        if product_name in ["Меха-инвентарь"]: multiplier += 0.80
+        if product_name in ["Пшеница-инвентарь"]: multiplier += 0.50
+        if product_name in ["Рыба-инвентарь"]: multiplier += 0.70
+        if product_name in ["Специи-инвентарь"]: multiplier += 0.50
+    elif game_state.season == Season.SPRING:
+        if product_name in ["Рыба-инвентарь"]: multiplier += 0.40
+        if product_name in ["Шерсть-инвентарь"]: multiplier -= 0.40
+        if product_name in ["Лекарства-инвентарь"]: multiplier += 0.30
+        if product_name in ["Специи-инвентарь"]: multiplier += 0.35
+        if product_name in ["Пшеница-инвентарь"]: multiplier += 0.50
         
     # События
+    clean_name = product_name.replace("-инвентарь", "")
     for event in game_state.active_events:
-        if product_name in event.get('effects', {}):
-            multiplier += event['effects'][product_name] / 100.0
+        effects = event.get('effects', {})
+        if product_name in effects:
+            multiplier += effects[product_name] / 100.0
+        elif clean_name in effects:
+            multiplier += effects[clean_name] / 100.0
             
-    # Регион (только для 2 уровня)
+    # Регион (только для 2 уровня) — Таблица 2
     if region and game_state.lvl == 2:
         if region == "Горный":
-            if product_name in ["Пшеница-инвентарь", "Рыба-инвентарь", "Лекарства-инвентарь"]: multiplier += 0.2
-            if product_name in ["Уголь-инвентарь", "Железо-инвентарь"]: multiplier -= 0.3
+            if product_name in ["Пшеница-инвентарь"]: multiplier += 0.20
+            if product_name in ["Рыба-инвентарь"]: multiplier += 0.20
+            if product_name in ["Вино-инвентарь"]: multiplier += 0.10
+            if product_name in ["Лекарства-инвентарь"]: multiplier += 0.30
+            if product_name in ["Специи-инвентарь"]: multiplier += 0.30
+            if product_name in ["Уголь-инвентарь"]: multiplier -= 0.40
+            if product_name in ["Железо-инвентарь"]: multiplier -= 0.30
+            if product_name in ["Драгоценные камни-инвентарь"]: multiplier -= 0.30
         elif region == "Приморье":
-            if product_name in ["Уголь-инвентарь", "Железо-инвентарь"]: multiplier += 0.1
-            if product_name in ["Рыба-инвентарь"]: multiplier -= 0.4
+            if product_name in ["Уголь-инвентарь"]: multiplier += 0.20
+            if product_name in ["Железо-инвентарь"]: multiplier += 0.10
+            if product_name in ["Драгоценные камни-инвентарь"]: multiplier += 0.30
+            if product_name in ["Пшеница-инвентарь"]: multiplier += 0.10
+            if product_name in ["Специи-инвентарь"]: multiplier += 0.10
+            if product_name in ["Рыба-инвентарь"]: multiplier -= 0.40
+            if product_name in ["Вино-инвентарь"]: multiplier -= 0.20
+        elif region == "Тайга":
+            if product_name in ["Пшеница-инвентарь"]: multiplier += 0.10
+            if product_name in ["Вино-инвентарь"]: multiplier += 0.10
+            if product_name in ["Специи-инвентарь"]: multiplier += 0.10
+            if product_name in ["Уголь-инвентарь"]: multiplier += 0.20
+            if product_name in ["Железо-инвентарь"]: multiplier += 0.10
+            if product_name in ["Лекарства-инвентарь"]: multiplier -= 0.20
+            if product_name in ["Драгоценные камни-инвентарь"]: multiplier -= 0.10
+        # Степь — без изменений (базовые цены)
+
+    if distance is not None and distance > 0:
+        risk = 0.05 + distance * 0.03
+        for event in game_state.active_events:
+            risk += event.get('risk_mod', 0) / 100.0
+        risk = min(0.95, risk)
+        multiplier *= (1 + risk)   # цена растёт с риском
             
     final_price = base * multiplier
     return max(1, int(final_price))
@@ -98,7 +200,7 @@ def calculate_sell_price(product_name, region=None):
 def apply_negative_effect(effect_name):
     if effect_name == "Разбойники":
         if game_state.sent_products:
-            game_state.sent_products.pop(0)
+            game_state.sent_products.pop(0)  
     elif effect_name == "Неудачное вложение":
         if game_state.inventory:
             game_state.inventory.pop()
@@ -134,20 +236,21 @@ def end_turn():
     game_state.has_revealed_card_this_turn = False
     game_state.current_open_card_index = -1
 
-    # Списание 5% от баланса за ход
-    game_state.balance = int(game_state.balance * 0.95)
+    # Списание 1% от баланса за ход
+    game_state.balance = int(game_state.balance * 0.99)
 
     if game_state.balance <= 0:
         game_state.current_window = Window.GAME_OVER
         return
 
     new_sent_products = []
-    for card, recipient, distance in game_state.sent_products:
+    for item in game_state.sent_products:
+        card, recipient, distance, price = item   # распаковываем с ценой
         if distance > 1:
-            new_sent_products.append((card, recipient, distance - 1))
+            new_sent_products.append((card, recipient, distance - 1, price))
         else:
-            sell_price = calculate_sell_price(card.name, recipient.region)
-            game_state.balance += sell_price
+            game_state.balance += price
+            print(f"[DEBUG] Delivered {card.name} for {price}")
     game_state.sent_products = new_sent_products
 
     # Обновляем события - уменьшаем длительность

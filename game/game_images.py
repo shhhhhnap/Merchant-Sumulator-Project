@@ -89,8 +89,8 @@ class ImageManager:
             "Сухой закон": "card_service_prohibition.png",
             "Праздник": "card_service_holiday.png",
             "Шахтёрская забастовка": "card_service_miners_strike.png",
-            "Разбойники": "card_service_miners_strike.png",
-            "Неудачное вложение": "card_service_miners_strike.png"
+            "Разбойники": "card_negative_bandits.png",
+            "Неудачное вложение": "card_negative_bad_investment.png"
         }
         
         print("[INFO] Loading event cards...")

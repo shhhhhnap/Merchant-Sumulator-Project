@@ -208,6 +208,13 @@ def draw_main():
         
         if img:
             screen.blit(img, (x, y))
+            
+            # Цена продажи прямо на карте
+            sell_price = calculate_sell_price(card.name)
+            price_text = font_small.render(f"{sell_price}", True, COLORS['dark_brown'])
+            # Размещаем цену внизу карты по центру
+            screen.blit(price_text, (x + 8, y+5))
+            
         else:
             pygame.draw.rect(screen, COLORS['white'], (x, y, 70, 100))
             pygame.draw.rect(screen, COLORS['dark_brown'], (x, y, 70, 100), 2)
@@ -216,6 +223,11 @@ def draw_main():
             icon_surf = font_icon.render(icon, True, COLORS['dark_brown'])
             icon_rect = icon_surf.get_rect(center=(x + 35, y + 50))
             screen.blit(icon_surf, icon_rect)
+            
+            # Цена для заглушки
+            sell_price = calculate_sell_price(card.name)
+            price_text = font_small.render(f"{sell_price}", True, COLORS['dark_brown'])
+            screen.blit(price_text, (x + 10, y+5))
 
     # Кнопка пропуска хода
     skip_rect = pygame.Rect(SCREEN_WIDTH - 100, SCREEN_HEIGHT - 70, 90, 50)
